@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
+
+contract AuthenticityCertificateTickets {
+// Almacenar el ID del certificado, el propietario del certificado, el tipo de elemento autenticado (por ejemplo, "EventTicket" o "BookingTicket") y el ID del elemento autenticado
+struct Certificate {
+bytes32 id;
+address owner;
+bytes32 typeId;
+bytes32 itemId;
+}
+
+// Estructura para devolver el certificado emitido
+struct Issue {
+address certAddress;
+bytes32 id;
+address owner;
+bytes32 typeId;
+bytes32 itemId;
+}
+
+// Mapping de los certificados emitidos, indexados por su dirección
+mapping (address => Certificate) public certificates;
+
+// Método para emitir un nuevo certificado de autenticidad
+function issue(address _owner, bytes32 _typeId, bytes32 _itemId) public returns (Issue memory) {
+// Generar un nuevo ID para el certificado
+bytes32 id = keccak256(abi.encodePacked(block.timestamp, _owner, _typeId, _itemId));
+// Emitir el certificado
+certificates[msg.sender] = Certificate(id, _owner, _typeId, _itemId);
+// Devolver el certificado emitido
+return Issue(msg.sender, id, _owner, _typeId, _itemId);
+}
+
+// Método para verificar si un certificado de autenticidad es válido
+function isValid(address _certificate) public view returns (bool) {
+// Verificar que el certificado exista
+if (certificates[_certificate].id == bytes32(0)) {
+return false;
+}
+// Devolver verdadero si el certificado es válido
+return true;
+}
+}
